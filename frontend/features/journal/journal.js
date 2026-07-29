@@ -21,7 +21,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let hasWrittenToday = false;
     try {
-        const response = await fetch(`http://localhost:5000/api/journal/${encodeURIComponent(email)}`);
+        const response = await fetch(`http://localhost:5000/api/journal/${encodeURIComponent(email)}`, {
+            cache: 'no-store'
+        });
         if (response.ok) {
             const data = await response.json();
             const entries = data.journals || [];

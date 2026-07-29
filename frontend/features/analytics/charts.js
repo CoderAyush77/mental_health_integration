@@ -281,9 +281,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================================
     // Fetch Main Dashboard Data
     // ==========================================
-    async function loadDashboardData() {
+    const loadDashboardData = async () => {
         try {
-            const response = await fetch(`${API_BASE}/${email}`);
+            const response = await fetch(`${API_BASE}/${email}`, { cache: 'no-store' });
             dashboardData = await response.json();
 
             // 1. Update Summary Cards

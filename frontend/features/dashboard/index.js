@@ -90,7 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = JSON.parse(currentUserStr).email;
 
             try {
-                const response = await fetch(`http://localhost:5000/api/journal/${encodeURIComponent(email)}`);
+                const response = await fetch(`http://localhost:5000/api/journal/${encodeURIComponent(email)}`, {
+                    cache: 'no-store'
+                });
                 const data = await response.json();
                 
                 const entries = data.journals || [];
