@@ -109,10 +109,10 @@ def get_voice_recommendation(stress_level, positivity_score):
 @analytics_bp.route("/<email>", methods=["GET"])
 def get_dashboard(email):
     text_entries = list(
-        journals_collection.find({"email": email}).sort("time_of_creation", -1)
+        journals_collection.find({"email": email}).sort("_id", -1)
     )
     voice_entries = list(
-        voice_collection.find({"email": email}).sort("time_of_creation", -1)
+        voice_collection.find({"email": email}).sort("_id", -1)
     )
 
     highest_stress_text = "N/A"
@@ -128,7 +128,8 @@ def get_dashboard(email):
         formatted_date = format_date(date_str)
 
         text_history.append({"id": str(entry["_id"]), "date": formatted_date})
-        text_by_date[date_str] = map_stress(entry.get("stress_level"), True)
+        if date_str not in text_by_date:
+            text_by_date[date_str] = map_stress(entry.get("stress_level"), True)
 
         val = get_compare_val(entry.get("stress_level"))
         if val > 0:
@@ -154,9 +155,10 @@ def get_dashboard(email):
         formatted_date = format_date(date_str)
 
         voice_history.append({"id": str(entry["_id"]), "date": formatted_date})
-        voice_by_date[date_str] = map_stress(
-            entry.get("overall_emotion_state"), False
-        )
+        if date_str not in voice_by_date:
+            voice_by_date[date_str] = map_stress(
+                entry.get("overall_emotion_state"), False
+            )
 
         val = get_compare_val(entry.get("overall_emotion_state"))
         if val > 0:

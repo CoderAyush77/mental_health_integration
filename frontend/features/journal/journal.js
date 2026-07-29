@@ -13,11 +13,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Enforce 1 journal entry per day limit
     const today = new Date();
-    const formattedDate = today.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
-        year: 'numeric' 
-    });
+    // Match the backend's "YYYY-MM-DD" UTC date format
+    const formattedDate = today.toISOString().split('T')[0];
 
     let hasWrittenToday = false;
     try {
