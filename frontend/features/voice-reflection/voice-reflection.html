@@ -84,7 +84,7 @@
                             <span id="voiceStatusText">Ready to record</span>
                         </div>
                         
-                        <div class="vr-mic-wrapper">
+                        <div class="vr-mic-wrapper" style="position: relative;">
                             <canvas id="waveformCanvas"></canvas>
                             <button id="btnRecord" class="vr-mic-btn" aria-label="Start Recording">
                                 <i class="fa-solid fa-microphone"></i>
@@ -93,11 +93,21 @@
                         
                         <div class="vr-timer" id="voiceTimer">00:00 / 05:00</div>
                         
+                        <div class="vr-drop-zone" id="dropZone">
+                            <div class="vr-drop-content">
+                                <i class="fa-solid fa-cloud-arrow-up text-green-500"></i>
+                                <p>Drag & Drop audio file here</p>
+                                <span>or <button type="button" id="btnUpload" class="vr-browse-btn">browse files</button></span>
+                            </div>
+                            <input type="file" id="fileUpload" accept="audio/*, video/mp4, audio/wav, audio/mpeg" style="display: none;">
+                        </div>
+                        
                         <div class="vr-controls">
                             <button id="btnPause" class="vr-ctrl-btn pause" disabled><i class="fa-solid fa-pause text-red-400"></i> Pause</button>
                             <button id="btnResume" class="vr-ctrl-btn resume" style="display:none;"><i class="fa-solid fa-play text-yellow-500"></i> Resume</button>
                             <button id="btnStop" class="vr-ctrl-btn stop" disabled><i class="fa-solid fa-square text-gray-500"></i> Stop</button>
                             <button id="btnCancel" class="vr-ctrl-btn cancel" disabled><i class="fa-solid fa-xmark text-gray-400"></i> Cancel</button>
+                            <button id="btnDelete" class="vr-ctrl-btn cancel" style="display:none;"><i class="fa-solid fa-trash text-red-500"></i> Discard</button>
                         </div>
                         
                         <div class="vr-privacy-inline">

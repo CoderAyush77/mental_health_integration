@@ -5,6 +5,7 @@ from utils.voice_predictor import (
     evaluate_voice_audio,
 )  # Import your PyTorch script
 from utils.streak import increment_user_streak
+from bson.objectid import ObjectId
 
 voice_bp = Blueprint("voice", __name__)
 
@@ -28,10 +29,35 @@ def save_voice_reflection():
 
     # Pass the audio file directly to your PyTorch model script
     try:
-        tone_metrics, overall_emotion = evaluate_voice_audio(audio_file)
+        from utils.predictor import evaluate_journal_stress
+        
+        # 1. Voice-based metrics
+        tone_metrics, voice_emotion = evaluate_voice_audio(audio_file)
+        
+        # 2. Text-based metrics (Highly accurate pre-trained model)
+        text_stress, _ = evaluate_journal_stress(content)
+        
+        # Blend them: if voice model is untrained, it defaults to Neutral/Calm.
+        # Use text model as a strong signal override to ensure accurate results.
+        overall_emotion = voice_emotion
+        if text_stress == "High" or text_stress == "Extreme":
+            overall_emotion = "Highly Stressed"
+            tone_metrics["stress_level"] = max(tone_metrics.get("stress_level", 0), 85)
+            tone_metrics["positivity"] = min(tone_metrics.get("positivity", 100), 20)
+        elif text_stress == "Medium":
+            overall_emotion = "Moderate Stress"
+            tone_metrics["stress_level"] = max(tone_metrics.get("stress_level", 0), 50)
+        elif text_stress == "Low":
+            overall_emotion = "Calm"
+            tone_metrics["positivity"] = max(tone_metrics.get("positivity", 0), 80)
+            tone_metrics["stress_level"] = min(tone_metrics.get("stress_level", 100), 20)
+            
+
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return (
-            jsonify({"error": "Audio processing failed. Please try again."}),
+            jsonify({"error": f"Audio processing failed: {e}"}),
             500,
         )
 
@@ -58,7 +84,8 @@ def save_voice_reflection():
         "time_of_creation": datetime.now(timezone.utc),
     }
 
-    voice_collection.insert_one(new_voice_log)
+    result = voice_collection.insert_one(new_voice_log)
+    inserted_id = str(result.inserted_id)
 
     # Update daily streak
     increment_user_streak(email)
@@ -69,6 +96,7 @@ def save_voice_reflection():
                 "status": "success",
                 "message": "Audio processed via PyTorch and saved securely.",
                 "metrics": tone_metrics,  # Send back to frontend to update the UI bars
+                "id": inserted_id
             }
         ),
         201,
@@ -96,3 +124,15 @@ def get_voice_history(email):
             pass
 
     return jsonify({"voice_reflections": entries}), 200
+
+# 3. DELETE ROUTE
+@voice_bp.route('/<entry_id>', methods=['DELETE'])
+def delete_voice_reflection(entry_id):
+    try:
+        result = voice_collection.delete_one({'_id': ObjectId(entry_id)})
+        if result.deleted_count == 1:
+            return jsonify({'message': 'Voice reflection deleted successfully'}), 200
+        else:
+            return jsonify({'error': 'Voice reflection not found'}), 404
+    except Exception as e:
+        return jsonify({'error': f'Invalid ID format: {e}'}), 400

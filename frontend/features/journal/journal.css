@@ -38,7 +38,8 @@
         }
 
         .dashboard-container {
-            width: 1100px; 
+            width: 95vw;
+            max-width: 1400px; 
             height: 85vh; 
             background: #ffffff;
             border-radius: 20px;

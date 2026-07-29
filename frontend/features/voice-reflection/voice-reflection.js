@@ -11,6 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnResume = document.getElementById('btnResume');
     const btnStop = document.getElementById('btnStop');
     const btnCancel = document.getElementById('btnCancel');
+    const btnDelete = document.getElementById('btnDelete');
+    const btnUpload = document.getElementById('btnUpload');
+    const fileUpload = document.getElementById('fileUpload');
+    const dropZone = document.getElementById('dropZone');
     
     const vrDot = document.getElementById('vrDot');
     const statusText = document.getElementById('voiceStatusText');
@@ -60,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let audioBlob = null;
     let audioUrl = null;
     let stream = null;
+    let currentRecordId = null;
     
     let timerInterval = null;
     let secondsElapsed = 0;
@@ -83,6 +88,45 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnResume) btnResume.addEventListener('click', resumeRecording);
         if (btnStop) btnStop.addEventListener('click', stopRecording);
         if (btnCancel) btnCancel.addEventListener('click', cancelRecording);
+        if (btnDelete) btnDelete.addEventListener('click', deleteRecording);
+        
+        if (btnUpload && fileUpload) {
+            btnUpload.addEventListener('click', (e) => {
+                e.stopPropagation(); // prevent double click if dropZone is also clicked
+                fileUpload.click();
+            });
+            fileUpload.addEventListener('change', handleFileUpload);
+        }
+        
+        if (dropZone && fileUpload) {
+            dropZone.addEventListener('click', () => fileUpload.click());
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.add('active'), false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.remove('active'), false);
+            });
+            
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    fileUpload.files = files; // Assign to input
+                    handleFileUpload({ target: { files: files } });
+                }
+            }, false);
+        }
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
         
         if (btnDownloadReport) btnDownloadReport.addEventListener('click', downloadRecording);
         if (btnAutofillJournal) btnAutofillJournal.addEventListener('click', handleAutofillJournal);
@@ -179,6 +223,62 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    async function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        updateUIState('finished');
+        if (statusText) statusText.textContent = 'Processing Upload...';
+        
+        let formData = new FormData();
+        formData.append('audio', file);
+        formData.append('content', "Uploaded Audio File. Transcript not available.");
+        
+        let userEmail = 'abc@gmail.com'; // Fallback
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            try { userEmail = JSON.parse(userStr).email || ''; } catch(e) {}
+        }
+        formData.append('email', userEmail);
+        
+        try {
+            const response = await fetch('http://localhost:5000/api/voice/create', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) throw new Error("Backend server error");
+            
+            const data = await response.json();
+            if (data.id) {
+                currentRecordId = data.id;
+            }
+            const finalEmotion = data.overall_emotion || "Neutral";
+            
+            if (data.metrics) {
+                setProgress(barConfidence, valConfidence, data.metrics.confidence);
+                setProgress(barEnergy, valEnergy, data.metrics.energy);
+                setProgress(barStress, valStress, data.metrics.stress_level, true);
+                setProgress(barPace, valPace, data.metrics.speech_pace);
+                setProgress(barPositivity, valPositivity, data.metrics.positivity);
+                
+                updateEmotionBadge(finalEmotion);
+                
+                if (btnDownloadReport) btnDownloadReport.disabled = false;
+                if (btnAutofillJournal) btnAutofillJournal.disabled = false;
+                
+                if (transcriptBox) transcriptBox.innerHTML = `<em>Uploaded File Analyzed. No transcript available.</em>`;
+            }
+            if (statusText) statusText.textContent = 'Upload Processed';
+        } catch (error) {
+            console.error('Upload Error:', error);
+            if (statusText) statusText.textContent = 'Upload Failed';
+            updateUIState('ready');
+        }
+        
+        fileUpload.value = ""; // Reset input
+    }
+
     async function startRecording() {
         try {
             stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -292,6 +392,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if (transcriptBox) transcriptBox.innerHTML = "Press the microphone icon to begin your voice reflection. Your transcript will appear here as you speak.";
     }
     
+    async function deleteRecording() {
+        if (!currentRecordId) {
+            cancelRecording();
+            return;
+        }
+        
+        try {
+            const response = await fetch(`http://localhost:5000/api/voice/${currentRecordId}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                if(window.showToast) window.showToast('Recording deleted successfully', 'success');
+                currentRecordId = null;
+                cancelRecording();
+            } else {
+                if(window.showToast) window.showToast('Failed to delete recording', 'error');
+            }
+        } catch(e) {
+            console.error('Delete error:', e);
+            if(window.showToast) window.showToast('Error deleting recording', 'error');
+        }
+    }
+    
     function stopStream() {
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
@@ -344,6 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnPause) btnPause.style.display = 'flex';
         if (btnStop) btnStop.disabled = true;
         if (btnCancel) btnCancel.disabled = true;
+        if (btnDelete) btnDelete.style.display = 'none';
         if (vrDot) vrDot.className = 'vr-dot';
         
         switch (state) {
@@ -369,6 +494,8 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'finished':
                 statusText.textContent = 'Processing...';
                 if (btnRecord) btnRecord.disabled = false;
+                if (btnDelete) btnDelete.style.display = 'inline-flex';
+                if (btnCancel) btnCancel.style.display = 'none';
                 break;
         }
     }
@@ -622,13 +749,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const formData = new FormData();
             formData.append('audio', wavBlob, 'recording.wav');
-            formData.append('content', currentTranscript.trim());
+            const finalContent = currentTranscript.trim() || "No speech detected in this recording.";
+            formData.append('content', finalContent);
             
             // Extract email for user identification
-            let userEmail = '';
+            let userEmail = 'anonymous@test.com'; // Fallback so backend doesn't 400
             const userStr = localStorage.getItem('currentUser');
             if (userStr) {
-                try { userEmail = JSON.parse(userStr).email || ''; } catch(e) {}
+                try { 
+                    let parsed = JSON.parse(userStr);
+                    if (parsed.email) userEmail = parsed.email;
+                } catch(e) {}
             }
             formData.append('email', userEmail);
             
@@ -640,6 +771,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error("Backend server is not running or returned an error.");
             
             const data = await response.json();
+            if (data.id) {
+                currentRecordId = data.id;
+            }
             const finalEmotion = data.overall_emotion || "Neutral";
             
             if (data.metrics) {
@@ -660,7 +794,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Update UI with the final emotion from backend
             let reason = `Our BERT Backend determined your overall emotion is ${finalEmotion}.`;
-            // if (aiReasoningBox) aiReasoningBox.textContent = reason;
+            if (aiReasoningBox) aiReasoningBox.textContent = reason;
             
             if (overallEmotion) overallEmotion.textContent = finalEmotion;
             

@@ -1,6 +1,9 @@
 {
     "venvPath": ".",
-    "venv": "env",
+    "venv": "backend/venv",
+    "extraPaths": [
+        "backend"
+    ],
     "include": [
         "backend"
     ]
