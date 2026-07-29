@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${label}
                 </div>
                 <div class="legend-val">
-                    ${Number(values[index]).toFixed(2)}
+                    ${Number(values[index]).toFixed(4)}
                 </div>
             `;
             legend.appendChild(row);
@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Emotion Doughnut
             const emotionsObj = data.emotions || {};
             const emotionData = emotionLabels.map(label =>
-                Number(emotionsObj[label] || 0).toFixed(2)
+                Number(emotionsObj[label] || 0).toFixed(4)
             );
 
             donutChart.data.datasets[0].data = emotionData;

@@ -6,16 +6,20 @@ echo DO NOT CLOSE THIS WINDOW if you want to use the app.
 echo ===================================================
 echo.
 
+:: Start Backend API in a separate window
+echo Starting Backend Server (this may take a moment to load ML models)...
+start "Backend API (Flask)" cmd /k "cd backend && .\venv\Scripts\python.exe app.py"
+
 :: Open the browser automatically after a short delay
-start "" cmd /c "timeout /t 2 >nul & start http://localhost:8000"
+start "" cmd /c "timeout /t 5 >nul & start http://localhost:8000"
 
 :: Try to start the server using Python first (fastest)
-python -m http.server 8000
+python -m http.server 8000 --directory frontend
 
 :: If Python isn't installed, it will try Node.js (npx)
 if %errorlevel% neq 0 (
     echo Python not found, trying Node.js...
-    npx http-server -p 8000
+    npx http-server frontend -p 8000
 )
 
 pause
