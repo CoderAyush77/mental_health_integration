@@ -7,3 +7,5 @@ backend/uploads/
 *.pt
 *.pkl
 *.crdownload
+env/
+__pycache__/

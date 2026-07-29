@@ -26,6 +26,7 @@
                     alert('Login successful!');
                     localStorage.setItem('currentUser', JSON.stringify({
                         name: data.user?.name || 'User',
+                        username: data.user?.username || 'User',
                         email
                     }));
                     window.location.href = '../../index.html';
@@ -79,6 +80,7 @@
                     alert(`Login successful! Welcome ${data.user?.name || 'Google User'}`);
                     localStorage.setItem('currentUser', JSON.stringify({
                         name: data.user?.name || 'Google User',
+                        username: data.user?.username || 'Google User',
                         email: email
                     }));
                     

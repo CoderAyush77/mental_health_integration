@@ -43,37 +43,7 @@ signupForm.addEventListener('submit', (e) => {
         return;
     }
 
-    // Passwords match and fields are valid: open the Terms and Conditions agreement popup
-    termsOverlay.classList.add('active');
-});
-
-// Enable/Disable Accept button based on checkboxes
-const updateAcceptButtonState = () => {
-    const isBothChecked = agreeSecurityPolicy.checked && agreeTermsOfService.checked;
-    acceptTermsBtn.disabled = !isBothChecked;
-};
-
-agreeSecurityPolicy.addEventListener('change', updateAcceptButtonState);
-agreeTermsOfService.addEventListener('change', updateAcceptButtonState);
-
-// Close terms popup on Decline
-declineTermsBtn.addEventListener('click', () => {
-    termsOverlay.classList.remove('active');
-    // Optional: Reset checkbox states
-    agreeSecurityPolicy.checked = false;
-    agreeTermsOfService.checked = false;
-    updateAcceptButtonState();
-});
-
-// Handle terms acceptance and complete signup
-acceptTermsBtn.addEventListener('click', () => {
-    const nameVal = document.getElementById('fullName').value.trim();
-    const emailVal = document.getElementById('email').value.trim();
-    const passVal = password.value;
-
-    // Close Modal
-    termsOverlay.classList.remove('active');
-
+    // Passwords match and fields are valid: directly submit the signup request
     fetch('http://localhost:5000/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -85,6 +55,7 @@ acceptTermsBtn.addEventListener('click', () => {
             // Set current active user session details
             localStorage.setItem('currentUser', JSON.stringify({
                 name: nameVal,
+                username: data.user?.username || nameVal,
                 email: emailVal,
                 agreedToTerms: true,
                 signupDate: new Date().toISOString()
@@ -102,16 +73,6 @@ acceptTermsBtn.addEventListener('click', () => {
         console.error('Error during signup:', err);
         alert('Backend server offline. Please ensure the backend server is running.');
     });
-});
-
-// Close terms overlay if clicking outside the modal card
-termsOverlay.addEventListener('click', (e) => {
-    if (e.target === termsOverlay) {
-        termsOverlay.classList.remove('active');
-        agreeSecurityPolicy.checked = false;
-        agreeTermsOfService.checked = false;
-        updateAcceptButtonState();
-    }
 });
 
 
@@ -152,6 +113,7 @@ submitDemoEmailBtn.addEventListener('click', async () => {
             alert(`Login successful! Welcome ${data.user?.name || 'Google User'}`);
             localStorage.setItem('currentUser', JSON.stringify({
                 name: data.user?.name || 'Google User',
+                username: data.user?.username || 'Google User',
                 email: email,
                 agreedToTerms: true,
                 signupDate: new Date().toISOString()

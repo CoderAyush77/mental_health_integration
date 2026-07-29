@@ -2,7 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================================
     // Configuration
     // ==========================================
-    const email = localStorage.getItem("email");
+    const currentUserStr = localStorage.getItem("currentUser");
+    const email = currentUserStr ? JSON.parse(currentUserStr).email : null;
 
     if (!email) {
         alert("Please login first.");
@@ -63,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 tooltip: {
                     callbacks: {
                         label(context) {
-                            return `${context.label}: ${context.parsed}%`;
+                            return `${context.label}: ${context.parsed}`;
                         }
                     }
                 }
@@ -86,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${label}
                 </div>
                 <div class="legend-val">
-                    ${Number(values[index]).toFixed(2)}%
+                    ${Number(values[index]).toFixed(2)}
                 </div>
             `;
             legend.appendChild(row);
@@ -354,8 +355,40 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Dashboard Loading Error:", err);
         }
     }
+    // ==========================================
+    // Delete Journal Logic
+    // ==========================================
+    const deleteTextJournalBtn = document.getElementById("deleteTextJournalBtn");
+    if (deleteTextJournalBtn) {
+        deleteTextJournalBtn.addEventListener("click", async () => {
+            const textSelect = document.getElementById('textHistorySelect');
+            const journalId = textSelect.value;
+            
+            // Ignore if there's no valid ID
+            if (!journalId || textSelect.options.length === 0 || textSelect.options[0].textContent === "No Text Entries") {
+                return;
+            }
+
+            if (confirm("Are you sure you want to delete this journal entry?")) {
+                try {
+                    const res = await fetch(`http://127.0.0.1:5000/api/journal/${journalId}`, {
+                        method: "DELETE"
+                    });
+                    if (res.ok) {
+                        alert("Journal entry deleted successfully.");
+                        loadDashboardData(); // Refresh the list
+                    } else {
+                        const data = await res.json();
+                        alert("Failed to delete journal: " + (data.error || "Unknown error"));
+                    }
+                } catch (e) {
+                    console.error("Delete error:", e);
+                    alert("Error communicating with server.");
+                }
+            }
+        });
+    }
 
     // Fire dashboard load
     loadDashboardData();
-
 });

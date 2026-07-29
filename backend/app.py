@@ -11,16 +11,18 @@ app = Flask(__name__)
 CORS(app)
 
 # Replace your blueprint registrations with this:
-app.register_blueprint(auth_bp, url_prefix='/api/auth')
-app.register_blueprint(settings_bp, url_prefix='/api/settings')
-app.register_blueprint(journal_bp, url_prefix='/api/journal')
-app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
-app.register_blueprint(voice_bp, url_prefix='/api/voice')
-app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
+app.register_blueprint(auth_bp, url_prefix="/api/auth")
+app.register_blueprint(settings_bp, url_prefix="/api/settings")
+app.register_blueprint(journal_bp, url_prefix="/api/journal")
+app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
+app.register_blueprint(voice_bp, url_prefix="/api/voice")
+app.register_blueprint(analytics_bp, url_prefix="/api/analytics")
 
-@app.route('/')
+
+@app.route("/")
 def home():
-    return jsonify({'message': 'Server is running!'})
+    return jsonify({"message": "Server is running!"})
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app.run(debug=True, port=5000)

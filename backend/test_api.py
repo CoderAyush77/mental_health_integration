@@ -6,12 +6,14 @@ url = "http://127.0.0.1:5000/api/voice/create"
 # The text data
 form_data = {
     "email": "test@serenemind.com",
-    "content": "This is my audio transcript test."
+    "content": "This is my audio transcript test.",
 }
 
 # The audio file (Fixed the quotes here!)
 files = {
-    "audio": open(r"C:\Users\APLUS\Documents\Sound Recordings\Recording.m4a", "rb")
+    "audio": open(
+        r"C:\Users\APLUS\Documents\Sound Recordings\Recording.m4a", "rb"
+    )
 }
 
 print("Sending audio to PyTorch backend...")
