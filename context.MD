@@ -1,49 +1,37 @@
-# Mental Health Analytics App - Project Context
+# Jourless Project Context & Improvements Log
+*Last Updated: July 30, 2026*
 
-## Project Overview
-This project is a mental health journaling and analytics application that allows users to write journal entries, which are then analyzed by a backend machine learning pipeline to determine the user's emotional state and stress level. The results are displayed in a frontend dashboard.
+This document serves as a record of critical improvements, UI/UX changes, and architectural updates made to the Jourless (formerly SereneMind/Ayna) project to ensure safe-keeping and easy context retrieval for future development.
 
-## Architecture
+## 1. Backend & Server Stability
+* **Dependency Resolution (`librosa`)**: Upgraded `librosa` to version `0.11.0` to bypass the `pkg_resources` dependency issue. This successfully resolved the `ModuleNotFoundError: No module named 'pkg_resources'` crash and allowed the PyTorch ML voice models (`voice_model.pt`) to run reliably alongside the Flask server.
+* **Environment Variables (.env)**:
+  * **API Key Security**: Removed the hardcoded `GROQ_API_KEY` from the frontend (`chatbot.js`). Created a secure `/api/config` backend route in `app.py` to dynamically serve the key from the `.env` file, significantly improving security.
+  * **Encryption Keys**: Identified that `FERNET_SECRET_KEY` is required by `database.py` for MongoDB encryption. The system currently auto-generates a temporary one on restart if missing, but it is logged here that a permanent key must be placed in `.env` to prevent decryption failures on historical journals.
 
-### Frontend
-- **Technology**: HTML, CSS, JavaScript (Vanilla).
-- **Functionality**: 
-  - Provides a dashboard interface for users.
-  - Allows users to submit new journal entries.
-  - Fetches and displays analytics data from the backend.
-  - Visualizes stress levels and emotional distributions (anger, disgust, fear, joy, neutral, sadness, surprise) using charts and UI elements.
+## 2. Chatbot Revamp (Jourless Identity)
+* **Rebranding**: Completely removed the old "Ayna Clinic" clinic template branding from `chatbot.html` and `chatbot.js`. The AI is officially rebranded as **Jourless**, an empathetic mental health companion.
+* **System Prompt Update**: The underlying Groq LLM prompt was updated to reflect the new Jourless identity, instructing the AI to act exclusively as a mental health listener and reflection guide.
+* **Context Awareness**: Implemented dynamic user context fetching from `/api/analytics/<email>`, allowing the Chatbot to adapt its responses based on the user's past text and voice journal entries.
+* **Smart Quick Prompts**: Replaced clinic booking prompts with actionable mental health prompts:
+  * 🌊 *Feeling Overwhelmed*
+  * 🫁 *Breathing Exercise*
+  * 📓 *Daily Reflection*
+  * 🌱 *Coping with Stress*
 
-### Backend
-- **Technology**: Python, Flask, SQLite (via SQLAlchemy).
-- **Functionality**:
-  - Exposes RESTful API endpoints for user authentication (mocked), submitting journal entries, and retrieving analytics data.
-  - Manages the database (`app.db`) containing `User`, `Document`, and `TextAnalysis` tables.
-  - Handles the machine learning inference pipeline for incoming text data.
+## 3. Analytics Dashboard Enhancements
+* **Dynamic Stress Recommendations**: 
+  * Implemented explicit Python logic in `analytics.py` for both **Voice** and **Text** analysis results to provide exact recommendations based on stress tiers: *Low, Medium/Moderate, High, and Extreme*.
+* **Smart Redirection System**: 
+  * Recommendations now feature actionable hyperlink redirects to relevant project modules. For example:
+    * "Continue Journaling" -> Redirects to the Journal feature.
+    * "Breathing/Relaxation exercises" -> Redirects to the Jourless Chatbot.
+    * "Professional Support" -> Redirects to the Help page.
+* **UI/UX Polishing**:
+  * **Text Recommendation UI**: Designed and integrated a brand-new, full-width `recommendation-box` layout for Text Analysis, matching the Voice Analysis style with a classy gradient (`#f0fff4` to white), soft drop shadows, and a sparkles icon (`fa-sparkles`).
+  * **Voice Metrics Grid**: Fixed the squished horizontal layout bug on the Voice Metrics by replacing the generic flex row with a structured 3-column CSS Grid. Styled each metric (Stress Level, Confidence, Positivity) into its own bounded mini-card to ensure consistent spacing.
+  * **Metric Number Cleanup**: Applied `Math.round()` in `charts.js` to strip bulky decimals (e.g., `95.00%` -> `95%`), resulting in a cleaner, premium aesthetic.
 
-## Machine Learning Pipeline (`backend/utils/predictor.py`)
-The project utilizes a hybrid NLP pipeline combining a pre-trained transformer model with a custom classical classifier:
-
-1. **Text Preprocessing**: 
-   - Incoming journal text is cleaned (lowercased, punctuation removed, multiple spaces collapsed) to match the exact format the models were trained on.
-2. **BERT Embedding & Emotion Extraction**: 
-   - The cleaned text is tokenized and passed through a DistilRoBERTa model fine-tuned for emotion recognition (`j-hartmann/emotion-english-distilroberta-base`).
-   - The model outputs 7 raw emotion probabilities (anger, disgust, fear, joy, neutral, sadness, surprise).
-   - The model's last hidden state is mean-pooled and L2-normalized to create a 768-dimensional sentence embedding.
-3. **Feature Scaling**: 
-   - The 768-dimensional embedding and 7 emotion probabilities are concatenated into a single 775-dimensional feature vector.
-   - This vector is scaled using a trained `StandardScaler` (`ml_model/feature_scaler.pkl`).
-4. **Stress Prediction**: 
-   - The scaled 775-dimensional feature vector is passed to a trained multiclass Logistic Regression model (`ml_model/stress_model.pkl`).
-   - The logistic regression model predicts the final stress tier: `['Extreme', 'High', 'Medium', 'low']`.
-
-## Key Files and Directories
-- `backend/app.py`: The main Flask server entry point defining the API routes.
-- `backend/database.py`: Defines the SQLAlchemy database schema.
-- `backend/utils/predictor.py`: Contains the `evaluate_journal_stress` function which runs the ML pipeline.
-- `ml_model/`: Contains the actual, trained classical ML models (`stress_model.pkl`, `feature_scaler.pkl`).
-- `ml_models/`: Contains experimental or alternative models (e.g., `voice_model.pt`).
-- `BertModelTrained.ipynb`: The Jupyter Notebook used by the developer to train the logistic regression classifier and scaler using the original `Combined Data.csv` dataset.
-
-## Current State & Recent Fixes
-- The backend API has been verified to correctly execute the inference pipeline and correctly returns the predictions made by the original `stress_model.pkl`.
-- A previous discrepancy between frontend results and Jupyter Notebook testing was resolved. It was found that the DistilRoBERTa model is highly sensitive to the length and exact wording of the text. Testing truncated vs full text produces significantly different emotion probabilities and final stress predictions. When evaluating identical strings, the backend API mathematically matches the notebook's behavior exactly.
+## 4. Voice Reflection UI Adjustments
+* **Layout Squeezing Fix**: Enforced `flex-direction: column` for `.vr-input-area` in `voice-reflection.css` to prevent layout collapse and overflow issues on smaller viewports.
+* **Data Safety Checks**: Added safe metric checking in `voice-reflection.js` before attempting to render `confidence`, `stress_level`, or `positivity` onto the DOM. This ensures the frontend doesn't crash if the machine learning model yields unexpected structures.

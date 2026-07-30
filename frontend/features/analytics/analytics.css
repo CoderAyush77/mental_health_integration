@@ -346,16 +346,16 @@
         .legend-dot { width: 6px; height: 6px; border-radius: 50%; }
         .legend-val { font-weight: 500; color: #1a202c; }
 
-        .voice-metrics-table { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 0 10px; }
-        .table-col { display: flex; flex-direction: column; gap: 5px; text-align: center; }
-        .table-col h4 { font-size: 0.75rem; color: #718096; font-weight: 500; }
-        .metric-badge { font-size: 0.75rem; font-weight: 600; padding: 2px 10px; border-radius: 12px; display: inline-block; }
+        .voice-metrics-table { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .table-col { display: flex; flex-direction: column; gap: 8px; text-align: center; align-items: center; justify-content: center; background: #f8fafc; border: 1px solid #edf2f7; padding: 12px 10px; border-radius: 12px; }
+        .table-col h4 { font-size: 0.75rem; color: #718096; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .metric-badge { font-size: 0.8rem; font-weight: 600; padding: 4px 12px; border-radius: 12px; display: inline-block; }
         .badge-red { background-color: #fff5f5; color: #e53e3e; }
         
-        .recommendation-box { display: flex; align-items: flex-start; gap: 10px; padding: 12px 15px; border-radius: 10px; }
-        .bg-green-light { background-color: #f0fff4; }
-        .recommendation-text p { font-size: 0.75rem; color: #276749; margin: 0; }
-        .recommendation-text .bold { font-weight: 600; margin-top: 2px; }
+        .recommendation-box { display: flex; align-items: flex-start; gap: 15px; padding: 18px 20px; border-radius: 12px; border: 1px solid rgba(56, 161, 105, 0.15); box-shadow: 0 4px 15px rgba(56, 161, 105, 0.05); }
+        .bg-green-light { background: linear-gradient(135deg, #f0fff4 0%, #ffffff 100%); }
+        .recommendation-text p { font-size: 0.8rem; color: #2f855a; margin: 0; line-height: 1.5; }
+        .recommendation-text .bold { font-weight: 600; margin-top: 6px; display: inline-block; }
 
         .bottom-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px; }
         .chart-box.large-chart { min-height: 250px; padding: 15px 20px; }

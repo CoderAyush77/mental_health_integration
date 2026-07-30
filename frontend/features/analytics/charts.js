@@ -127,6 +127,17 @@ document.addEventListener("DOMContentLoaded", () => {
             donutChart.update();
             renderLegend(emotionData);
 
+            // Recommendation
+            if (data.recommendation) {
+                document.getElementById("textRecText1").textContent = data.recommendation.text || "";
+                if (data.recommendation.link) {
+                    document.getElementById("textRecText2").innerHTML = `<a href="${data.recommendation.link}" style="color: var(--primary);">${data.recommendation.linkText}</a>`;
+                } else {
+                    document.getElementById("textRecText2").textContent = "";
+                }
+            }
+
+
         } catch (err) {
             console.error("Text Analysis Error:", err);
         }
@@ -154,16 +165,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Confidence
             document.getElementById("voiceConfidenceVal").textContent =
-                `${Number(data.confidence || 0).toFixed(2)}%`;
+                `${Math.round(data.confidence || 0)}%`;
 
             // Positivity
             document.getElementById("voicePositivityVal").textContent =
-                `${Number(data.positivity || 0).toFixed(2)}/100`;
+                `${Math.round(data.positivity || 0)}/100`;
 
             // Recommendation
             if (data.recommendation) {
-                document.getElementById("voiceRecText1").textContent = data.recommendation.line1 || "";
-                document.getElementById("voiceRecText2").textContent = data.recommendation.line2 || "";
+                document.getElementById("voiceRecText1").textContent = data.recommendation.text || "";
+                if (data.recommendation.link) {
+                    document.getElementById("voiceRecText2").innerHTML = `<a href="${data.recommendation.link}" style="color: var(--primary);">${data.recommendation.linkText}</a>`;
+                } else {
+                    document.getElementById("voiceRecText2").textContent = "";
+                }
             }
 
         } catch (err) {

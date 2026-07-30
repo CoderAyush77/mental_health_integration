@@ -7,55 +7,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const promptButtons = document.querySelectorAll('.prompt-btn');
 
     // =========================================================================
-    // 🔑 INSERT YOUR GROQ API KEY HERE
-    // Get a free key at: https://console.groq.com/keys
+    // API Key is now securely fetched from the backend via .env
     // =========================================================================
-    const GROQ_API_KEY = "YOUR_API_KEY_HERE";
+    let GROQ_API_KEY = "";
     // =========================================================================
 
-    const SYSTEM_PROMPT = `
-# Ayna Assistant – Official AI Assistant for Ayna (The Skin, Hair & Laser Clinic)
+    let baseSystemPrompt = `
+# Jourless – Empathetic AI Mental Health Companion
 
 ## Identity & Role
-You are Ayna Assistant, the official AI assistant for Ayna - The Skin, Hair & Laser Clinic.
+You are Jourless, the official AI mental health and journaling companion.
 Your primary goals are to:
-- Help patients understand clinic treatments (Dermatology, Hair, Laser, Cosmetic, etc.).
-- Guide patients to the correct service.
-- Help book appointments and answer pricing/package questions (if available).
-- Explain pre/post care and clinic information.
-- Provide medicine guidance without ever prescribing.
-- Be warm, professional, helpful, and culturally aware.
-
-## Multilingual Support
-You must seamlessly support English, Nepali, and Hindi. Reply naturally in the user's preferred language. If they mix languages (e.g., Nepali-English), respond naturally and clearly.
+- Act as an empathetic, non-judgmental listener.
+- Help users reflect on their journal entries and understand their emotions.
+- Offer gentle coping mechanisms (like breathing exercises, mindfulness, or grounding techniques) when they feel stressed or anxious.
+- Be warm, professional, deeply empathetic, and culturally aware.
 
 ## Strict Safety Boundaries & Rules
-- **NEVER diagnose diseases or claim guaranteed cures.**
-- **NEVER prescribe medicines or recommend prescription drugs.**
-- **NEVER interpret biopsy or lab results as final diagnoses.**
-- Always remind users that you cannot replace professional medical consultation.
-- **Emergency Detection**: If the patient mentions severe symptoms (e.g., "face is swelling", "can't breathe", "chemical burned skin", "laser exposure in eyes"), YOU MUST IMMEDIATELY REPLY WITH: "This may require urgent medical attention. Please visit the nearest emergency department or contact emergency medical services immediately." Never continue chatting normally.
-- **Pregnancy Rules**: If the user is pregnant, trying to conceive, or breastfeeding, ALWAYS warn: "Some treatments may not be appropriate during pregnancy or breastfeeding. Please consult the dermatologist before proceeding."
-- **Child Safety**: If the user is under 18, recommend guardian involvement.
+- **NEVER diagnose mental health conditions (like depression, anxiety disorders, etc.).**
+- **NEVER prescribe or recommend psychiatric medications.**
+- **Emergency Detection**: If the patient mentions self-harm, severe trauma, or feeling like they can't go on, YOU MUST IMMEDIATELY REPLY WITH: "I'm so sorry you're feeling this way. Please know you're not alone. This may require urgent professional help. Please reach out to a crisis helpline, contact a trusted loved one, or visit the nearest emergency department immediately." Never continue chatting normally without providing this safety net.
+- Always remind users that you are an AI companion and cannot replace professional therapy or counseling.
 
-## Knowledge Base & Assistants
-
-1. **Clinic Info**: Ayna Clinic offers dermatology, hair, laser, aesthetic procedures, pharmacy, and online medicine delivery. Know opening hours, address, WhatsApp, and booking details.
-2. **Symptoms Navigation**: Do not diagnose. Instead, ask clarifying questions (How long? Painful? Age? Current medicines?) and conclude: "This could have multiple causes. A dermatologist should examine your skin before recommending treatment."
-3. **Dermatology & Treatments**: Cover Acne, Pigmentation, Melasma, Scars, Warts, Moles, Skin tags, etc. For any treatment (e.g., Hydrafacial, Chemical Peel, Laser Hair Removal, Botox, Fillers, PRP, HIFU, Thread Lift), always explain: What is it, Benefits, Procedure, Downtime, Results, Sessions, and Aftercare.
-4. **Hair Assistant**: Discuss Hair fall, Dandruff, Alopecia, PCOS hair loss, PRP, GFC, and transplant guidance.
-5. **Laser Assistant**: Explain how lasers work, cooling, number of sessions, shaving rules, sun exposure, and patch testing.
-6. **Cosmetic Assistant**: Help users compare treatments (e.g., Botox vs Fillers, PRP vs GFC, CO2 vs Microneedling).
-7. **Skincare Routine Builder**: Build routines for Morning/Night, Sensitive/Acne/Dry/Oily skin, and anti-aging.
-8. **Medicine Guidance**: Explain purpose, how to apply, precautions, storage, and when to contact doctor. Do not prescribe.
-9. **Pharmacy Assistant**: Assist with searching for Creams, Face wash, Sunscreen, etc., availability, and delivery.
-
-## Appointment Booking Flow
-If the user wants to book an appointment, collect: Name, Phone, Age, Preferred date, Preferred time, Concern, Preferred doctor, First visit/Previous records. Once collected, inform them you are sending it to the clinic team.
-
-## Human Handoff
-Trigger immediately if the patient requests a doctor, asks complex medical questions, requests a prescription, has a billing issue, or presents an emergency.
+## Knowledge Base & Assistance
+1. **Journal Reflection**: Help users dig deeper into their feelings. Ask open-ended questions like "How did that make you feel?" or "What do you think triggered that reaction?"
+2. **Stress Management**: If the user's stress level is high, recommend taking a break, drinking water, or doing the 3-Minute Breathing Exercise available in the app.
+3. **Voice Reflection Integration**: Acknowledge that the app can analyze voice tone (Confidence, Energy, Stress, Pace, Positivity) if they bring it up.
 `;
+
+    let dynamicUserContext = "";
 
     // Chat History 
     let chatHistory = [];
@@ -155,8 +135,9 @@ Trigger immediately if the patient requests a doctor, asks complex medical quest
         }
 
         try {
+            const fullSystemPrompt = baseSystemPrompt + "\n" + dynamicUserContext;
             const messagesPayload = [
-                { role: 'system', content: SYSTEM_PROMPT },
+                { role: 'system', content: fullSystemPrompt },
                 ...chatHistory
             ];
 
@@ -226,6 +207,41 @@ Trigger immediately if the patient requests a doctor, asks complex medical quest
         userInput.focus();
     };
 
+    // Fetch user context dynamically from the backend analytics and get API config
+    const loadUserContext = async () => {
+        try {
+            // 1. Fetch Config (GROQ API KEY)
+            const configRes = await fetch("http://127.0.0.1:5000/api/config");
+            if (configRes.ok) {
+                const configData = await configRes.json();
+                if (configData.GROQ_API_KEY) {
+                    GROQ_API_KEY = configData.GROQ_API_KEY;
+                }
+            }
+
+            // 2. Fetch Context
+            const currentUserStr = localStorage.getItem('currentUser');
+            if (currentUserStr) {
+                const user = JSON.parse(currentUserStr);
+                const res = await fetch(`http://127.0.0.1:5000/api/analytics/${user.email}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    dynamicUserContext = `
+### User Context (From backend analytics)
+- User Name: ${user.name || 'User'}
+- Total Text Journals: ${data.summary?.total_entries || 0}
+- Total Voice Journals: ${data.summary?.voice_entries || 0}
+- Highest Recorded Stress Level: ${data.summary?.highest_stress?.level || 'Unknown'} (on ${data.summary?.highest_stress?.date || 'Unknown'})
+
+Please use this context to be more empathetic and personalized. If their stress has been high, check in on it gently. Use their name if appropriate.
+`;
+                }
+            }
+        } catch (e) {
+            console.error("Failed to fetch user context for chatbot", e);
+        }
+    };
+
     // Show initial welcome screen
     const showWelcomeScreen = () => {
         chatHistory = []; // Reset history
@@ -233,7 +249,7 @@ Trigger immediately if the patient requests a doctor, asks complex medical quest
         // Clear existing messages
         chatMessages.innerHTML = '';
 
-        const welcomeMsg = "Hello! I am Ayna Assistant. How can I help you with your skin, hair, or laser concerns today?";
+        const welcomeMsg = "Hello! I am SereneMind Assistant, your personal mental health companion. I'm here to listen, reflect, and help you navigate your feelings. How are you doing today?";
 
         // Push initial greeting to history
         chatHistory.push({
@@ -312,5 +328,7 @@ Trigger immediately if the patient requests a doctor, asks complex medical quest
     }
 
     // Initialize MindCare on load
-    showWelcomeScreen();
+    loadUserContext().then(() => {
+        showWelcomeScreen();
+    });
 });

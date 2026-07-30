@@ -23,7 +23,7 @@ def map_stress(level, is_text=True):
 
 
 def get_compare_val(level_str):
-    """Strict 1-4 mapping solely for calculating the Highest Stress Summary."""
+    """Strict mapping solely for calculating the Highest Stress Summary."""
     if not level_str:
         return 0
     level = str(level_str).lower()
@@ -49,58 +49,59 @@ def format_date(date_str):
         return date_str
 
 
-def get_voice_recommendation(stress_level, positivity_score):
-    """Generates dynamic voice recommendations based on both stress and positivity."""
-    stress = str(stress_level).lower()
-    try:
-        pos = float(positivity_score)
-    except (ValueError, TypeError):
-        pos = 0.0
-
-    if "extreme" in stress:
+def get_voice_recommendation(stress_level):
+    stress = str(stress_level).capitalize()
+    if stress == "Low":
         return {
-            "line1": "Your voice analysis suggests elevated stress levels.",
-            "line2": "Consider taking a break or speaking with someone you trust.",
+            "text": "Keep up your positive routine.",
+            "link": "../journal/journal.html",
+            "linkText": "Continue Journaling"
         }
-    elif "high" in stress:
-        if pos < 40:
-            return {
-                "line1": "Your voice analysis suggests high stress with lower positivity.",
-                "line2": "Try relaxation exercises and avoid overexertion.",
-            }
-        else:
-            return {
-                "line1": "Your stress is elevated.",
-                "line2": "Take regular breaks and practice mindfulness.",
-            }
-    elif "medium" in stress or "moderate" in stress:
-        if pos < 50:
-            return {
-                "line1": "Your emotional state is moderate.",
-                "line2": "Self-care activities may help improve your mood.",
-            }
-        else:
-            return {
-                "line1": "Your emotional state is fairly balanced.",
-                "line2": "Continue maintaining healthy routines.",
-            }
-    elif "low" in stress:
-        if pos >= 70:
-            return {
-                "line1": "Your voice reflects a positive emotional state.",
-                "line2": "Keep up your healthy habits!",
-            }
-        else:
-            return {
-                "line1": "Your stress level is low.",
-                "line2": "Continue monitoring your wellbeing and maintaining balance.",
-            }
-
-    # Safe fallback just in case
+    elif stress == "Moderate" or stress == "Medium":
+        return {
+            "text": "Take a short break and practice relaxation exercises.",
+            "link": "../chatbot/chatbot.html",
+            "linkText": "Relaxation Exercises"
+        }
+    elif stress == "High" or stress == "Extreme":
+        return {
+            "text": "Consider mindfulness exercises and professional support if stress continues.",
+            "link": "../help/help.html",
+            "linkText": "Professional Support"
+        }
     return {
-        "line1": "The analysis indicates a moderate emotional state.",
-        "line2": "Continue monitoring your wellbeing.",
+        "text": "Keep up your positive routine.",
+        "link": "../journal/journal.html",
+        "linkText": "Continue Journaling"
     }
+
+def get_text_recommendation(stress_level):
+    stress = str(stress_level).capitalize()
+    if stress == "Low":
+        return {
+            "text": "Keep maintaining your healthy routine and continue journaling regularly.",
+            "link": "../journal/journal.html",
+            "linkText": "Go to Journal"
+        }
+    elif stress == "Medium" or stress == "Moderate":
+        return {
+            "text": "Try a 5-minute breathing exercise and take regular breaks during work or study.",
+            "link": "../chatbot/chatbot.html",
+            "linkText": "Try Breathing Exercise"
+        }
+    elif stress == "High":
+        return {
+            "text": "Practice guided meditation, reduce workload if possible, and consider talking to a trusted friend or family member.",
+            "link": "../chatbot/chatbot.html",
+            "linkText": "Guided Meditation"
+        }
+    elif stress == "Extreme":
+        return {
+            "text": "Your responses indicate persistent high stress. Please consider contacting a mental health professional or counselor if these feelings continue.",
+            "link": "../help/help.html",
+            "linkText": "Get Professional Help"
+        }
+    return None
 
 
 # ==========================================
@@ -250,6 +251,7 @@ def get_analysis(email):
                     "surprise": 0,
                 },
             ),
+            "recommendation": get_text_recommendation(entry.get("stress_level", "Medium"))
         }
         return jsonify(payload), 200
 
@@ -271,7 +273,7 @@ def get_analysis(email):
             "confidence": metrics.get("confidence", 0),
             "positivity": positivity,
             "recommendation": get_voice_recommendation(
-                stress_level, positivity
+                stress_level
             ),
         }
         return jsonify(payload), 200

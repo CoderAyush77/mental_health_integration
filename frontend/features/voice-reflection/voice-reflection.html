@@ -84,22 +84,25 @@
                             <span id="voiceStatusText">Ready to record</span>
                         </div>
                         
-                        <div class="vr-mic-wrapper" style="position: relative;">
-                            <canvas id="waveformCanvas"></canvas>
-                            <button id="btnRecord" class="vr-mic-btn" aria-label="Start Recording">
-                                <i class="fa-solid fa-microphone"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="vr-timer" id="voiceTimer">00:00 / 05:00</div>
-                        
-                        <div class="vr-drop-zone" id="dropZone">
-                            <div class="vr-drop-content">
-                                <i class="fa-solid fa-cloud-arrow-up text-green-500"></i>
-                                <p>Drag & Drop audio file here</p>
-                                <span>or <button type="button" id="btnUpload" class="vr-browse-btn">browse files</button></span>
+                        <div class="vr-input-area">
+                            <div class="vr-record-section">
+                                <div class="vr-mic-wrapper" style="position: relative;">
+                                    <canvas id="waveformCanvas"></canvas>
+                                    <button id="btnRecord" class="vr-mic-btn" aria-label="Start Recording">
+                                        <i class="fa-solid fa-microphone"></i>
+                                    </button>
+                                </div>
+                                <div class="vr-timer" id="voiceTimer">00:00 / 05:00</div>
                             </div>
-                            <input type="file" id="fileUpload" accept="audio/*, video/mp4, audio/wav, audio/mpeg" style="display: none;">
+                            
+                            <div class="vr-drop-zone" id="dropZone">
+                                <div class="vr-drop-content">
+                                    <i class="fa-solid fa-cloud-arrow-up text-green-500"></i>
+                                    <p>Drag & Drop audio file here</p>
+                                    <span>or <button type="button" id="btnUpload" class="vr-browse-btn">browse files</button></span>
+                                </div>
+                                <input type="file" id="fileUpload" accept="audio/*, video/mp4, audio/wav, audio/mpeg" style="display: none;">
+                            </div>
                         </div>
                         
                         <div class="vr-controls">

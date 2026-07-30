@@ -24,5 +24,11 @@ def home():
     return jsonify({"message": "Server is running!"})
 
 
+@app.route("/api/config")
+def get_config():
+    import os
+    return jsonify({"GROQ_API_KEY": os.getenv("GROQ_API_KEY", "")})
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

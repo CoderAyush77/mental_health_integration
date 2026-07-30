@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('content', "Uploaded Audio File. Transcript not available.");
         
         let userEmail = 'abc@gmail.com'; // Fallback
-        const userStr = localStorage.getItem('user');
+        const userStr = localStorage.getItem('currentUser');
         if (userStr) {
             try { userEmail = JSON.parse(userStr).email || ''; } catch(e) {}
         }
@@ -256,11 +256,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const finalEmotion = data.overall_emotion || "Neutral";
             
             if (data.metrics) {
-                setProgress(barConfidence, valConfidence, data.metrics.confidence);
-                setProgress(barEnergy, valEnergy, data.metrics.energy);
-                setProgress(barStress, valStress, data.metrics.stress_level, true);
-                setProgress(barPace, valPace, data.metrics.speech_pace);
-                setProgress(barPositivity, valPositivity, data.metrics.positivity);
+                if ('confidence' in data.metrics) setProgress(barConfidence, valConfidence, data.metrics.confidence);
+                if ('energy' in data.metrics) setProgress(barEnergy, valEnergy, data.metrics.energy);
+                if ('stress_level' in data.metrics) setProgress(barStress, valStress, data.metrics.stress_level, true);
+                if ('speech_pace' in data.metrics) setProgress(barPace, valPace, data.metrics.speech_pace);
+                if ('positivity' in data.metrics) setProgress(barPositivity, valPositivity, data.metrics.positivity);
                 
                 updateEmotionBadge(finalEmotion);
                 
@@ -777,11 +777,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const finalEmotion = data.overall_emotion || "Neutral";
             
             if (data.metrics) {
-                setProgress(barConfidence, valConfidence, data.metrics.confidence);
-                setProgress(barEnergy, valEnergy, data.metrics.energy);
-                setProgress(barStress, valStress, data.metrics.stress_level, true);
-                setProgress(barPace, valPace, data.metrics.speech_pace);
-                setProgress(barPositivity, valPositivity, data.metrics.positivity);
+                if ('confidence' in data.metrics) setProgress(barConfidence, valConfidence, data.metrics.confidence);
+                if ('energy' in data.metrics) setProgress(barEnergy, valEnergy, data.metrics.energy);
+                if ('stress_level' in data.metrics) setProgress(barStress, valStress, data.metrics.stress_level, true);
+                if ('speech_pace' in data.metrics) setProgress(barPace, valPace, data.metrics.speech_pace);
+                if ('positivity' in data.metrics) setProgress(barPositivity, valPositivity, data.metrics.positivity);
 
                 // const stressRating = Math.max(1, Math.ceil(data.metrics.stress / 20));
                 // const confRating = Math.max(1, Math.ceil(data.metrics.confidence / 20));

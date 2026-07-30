@@ -169,6 +169,41 @@
     animation: pulse 1.5s infinite;
 }
 
+.vr-input-area {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 1.5rem;
+    margin: 1rem 0 2rem;
+}
+
+@media (min-width: 1024px) {
+    .vr-input-area {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+    }
+    .vr-record-section {
+        flex: 0 0 auto;
+    }
+    .vr-drop-zone {
+        flex: 1;
+        width: 100%;
+        margin: 0;
+        height: 120px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}
+
+.vr-record-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .vr-mic-wrapper {
     position: relative;
     width: 180px;
@@ -176,7 +211,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 2rem 0;
+    margin-bottom: 1rem;
 }
 
 #waveformCanvas {
@@ -217,7 +252,6 @@
     font-size: 1.25rem;
     font-weight: 600;
     font-family: monospace;
-    margin-bottom: 1.5rem;
 }
 
 .vr-controls {
@@ -258,10 +292,8 @@
     gap: 0.5rem;
 }
 
-/* Drag and Drop Zone */
 .vr-drop-zone {
     width: 100%;
-    margin-bottom: 1.5rem;
     padding: 1.5rem;
     border: 2px dashed #cbd5e1;
     border-radius: var(--vr-radius-md);
@@ -343,7 +375,6 @@
     line-height: 1.6;
     color: var(--vr-text-main);
     min-height: 150px;
-    max-height: 250px;
     overflow-y: auto;
     margin-bottom: 1rem;
 }
@@ -476,13 +507,21 @@
 }
 
 /* Column 3: AI Insights & Actions */
+.vr-card-ai {
+    display: flex;
+    flex-direction: column;
+}
+
 .vr-ai-text {
+    flex-grow: 1;
     font-size: 0.95rem;
     line-height: 1.6;
     background: var(--vr-bg);
     padding: 1rem;
     border-radius: var(--vr-radius-md);
     margin-bottom: 1.5rem;
+    overflow-y: auto;
+    min-height: 120px;
 }
 
 .vr-star-ratings {
