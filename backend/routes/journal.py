@@ -21,6 +21,15 @@ def create_journal():
         if not email or not content:
             return jsonify({"error": "Email and content are required"}), 400
 
+        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+        from database import voice_collection
+        if voice_collection.find_one({"email": email, "date": today_str}):
+            return jsonify({"error": "You have already completed your daily check-in today using Voice Reflection! Only one check-in method per day is allowed."}), 400
+
+        if db.journals.find_one({"email": email, "date": today_str}):
+            return jsonify({"error": "You have already completed your daily journal entry for today!"}), 400
+
         # 1. Run the ML Prediction (Chunking + BERT + Classifier)
         stress_level, emotions = evaluate_journal_stress(content)
 

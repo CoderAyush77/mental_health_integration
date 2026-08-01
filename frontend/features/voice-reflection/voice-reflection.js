@@ -164,6 +164,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         initTimelineChart();
+        checkDailyCheckinStatus();
+    }
+
+    async function checkDailyCheckinStatus() {
+        const currentUserStr = localStorage.getItem('currentUser');
+        if (!currentUserStr) return;
+        const email = JSON.parse(currentUserStr).email;
+        const getHeaders = (extra = {}) => window.getAuthHeaders ? window.getAuthHeaders(extra) : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || ''), ...extra };
+
+        try {
+            const res = await fetch(`/api/dashboard/daily_checkin_status/${encodeURIComponent(email)}`, {
+                headers: getHeaders(),
+                cache: 'no-store'
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.has_journal || data.has_voice) {
+                    disableVoiceReflectionUI(data.has_journal);
+                }
+            }
+        } catch(e) {
+            console.error("Error checking daily check-in status:", e);
+        }
+    }
+
+    function disableVoiceReflectionUI(usedJournal) {
+        if (btnRecord) {
+            btnRecord.disabled = true;
+            btnRecord.style.opacity = '0.5';
+            btnRecord.style.cursor = 'not-allowed';
+            btnRecord.title = usedJournal ? "Daily Check-in Complete via Journal" : "Daily Check-in Complete via Voice";
+        }
+        if (btnUpload) {
+            btnUpload.disabled = true;
+            btnUpload.style.opacity = '0.5';
+            btnUpload.style.cursor = 'not-allowed';
+        }
+        if (dropZone) {
+            dropZone.style.pointerEvents = 'none';
+            dropZone.style.opacity = '0.6';
+        }
+        if (statusText) {
+            statusText.innerHTML = usedJournal 
+                ? '<i class="fa-solid fa-lock" style="color:#ed8936;"></i> Daily Check-in Complete via Journal Writing. Voice Reflection is locked until tomorrow.'
+                : '<i class="fa-solid fa-lock" style="color:#48bb78;"></i> Daily Check-in Complete via Voice Reflection. Come back tomorrow!';
+        }
     }
 
     function initTimelineChart() {
@@ -242,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('email', userEmail);
         
         try {
-            const response = await fetch('http://localhost:5000/api/voice/create', {
+            const response = await fetch('/api/voice/create', {
                 method: 'POST',
                 body: formData
             });
@@ -399,7 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         try {
-            const response = await fetch(`http://localhost:5000/api/voice/${currentRecordId}`, {
+            const response = await fetch(`/api/voice/${currentRecordId}`, {
                 method: 'DELETE'
             });
             
@@ -763,7 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             formData.append('email', userEmail);
             
-            const response = await fetch('http://localhost:5000/api/voice/create', {
+            const response = await fetch('/api/voice/create', {
                 method: 'POST',
                 body: formData
             });

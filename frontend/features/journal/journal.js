@@ -18,34 +18,40 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const getHeaders = (extra = {}) => window.getAuthHeaders ? window.getAuthHeaders(extra) : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || ''), ...extra };
 
-    let hasWrittenToday = false;
+    let hasWrittenJournalToday = false;
+    let hasWrittenVoiceToday = false;
     try {
-        const response = await fetch(`http://localhost:5000/api/journal/${encodeURIComponent(email)}`, {
+        const response = await fetch(`/api/dashboard/daily_checkin_status/${encodeURIComponent(email)}`, {
             headers: getHeaders(),
             cache: 'no-store'
         });
         if (response.ok) {
-            const data = await response.json();
-            const entries = data.journals || [];
-            // Backend might send dates in a different format, adjust if necessary, but this matches offline logic
-            hasWrittenToday = entries.some(entry => entry.date === formattedDate);
+            const statusData = await response.json();
+            hasWrittenJournalToday = !!statusData.has_journal;
+            hasWrittenVoiceToday = !!statusData.has_voice;
         }
     } catch (error) {
-        console.error('Error fetching journals:', error);
+        console.error('Error fetching daily check-in status:', error);
     }
 
-    if (hasWrittenToday) {
+    if (hasWrittenJournalToday || hasWrittenVoiceToday) {
         if (titleInput) {
             titleInput.disabled = true;
-            titleInput.value = "Daily Check-in Complete";
+            titleInput.value = hasWrittenVoiceToday 
+                ? "Daily Check-in Complete (Voice Reflection Used)" 
+                : "Daily Check-in Complete (Journal Used)";
         }
         if (contentInput) {
             contentInput.disabled = true;
-            contentInput.value = "You have already written your journal entry for today! Great job staying consistent with your mindfulness routine. Come back tomorrow to write again.";
+            contentInput.value = hasWrittenVoiceToday
+                ? "You have already completed your daily check-in today using Voice Reflection! Since you chose Voice Reflection today, Journal Writing is locked until tomorrow. Great job staying consistent!"
+                : "You have already written your journal entry for today! Great job staying consistent with your mindfulness routine. Come back tomorrow to write again.";
         }
         if (createBtn) {
             createBtn.disabled = true;
-            createBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Come Back Tomorrow';
+            createBtn.innerHTML = hasWrittenVoiceToday
+                ? '<i class="fa-solid fa-lock"></i> Completed via Voice Reflection'
+                : '<i class="fa-solid fa-lock"></i> Completed via Journal';
             createBtn.style.opacity = '0.6';
             createBtn.style.cursor = 'not-allowed';
         }
@@ -75,7 +81,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 try {
-                    const response = await fetch('http://localhost:5000/api/journal/create', {
+                    const response = await fetch('/api/journal/create', {
                         method: 'POST',
                         headers: getHeaders({ 'Content-Type': 'application/json' }),
                         body: JSON.stringify({ email, title: titleVal, content: contentVal })

@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    const API_BASE = `http://127.0.0.1:5000/api/analytics`;
+    const API_BASE = `/api/analytics`;
 
     // ==========================================
     // Header Date
@@ -389,7 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (confirm("Are you sure you want to delete this journal entry?")) {
                 try {
-                    const res = await fetch(`http://127.0.0.1:5000/api/journal/${journalId}`, {
+                    const res = await fetch(`/api/journal/${journalId}`, {
                         method: "DELETE"
                     });
                     if (res.ok) {

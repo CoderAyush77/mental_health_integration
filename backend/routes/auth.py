@@ -166,19 +166,11 @@ def login_with_google():
     existing_user = users_collection.find_one({"email": email})
 
     if not existing_user:
-        first_name = email.split("@")[0].capitalize()
-        fallback_username = f"user_{random.randint(1000, 9999)}"
-
-        new_user = {
-            "name": first_name or "Google User",
-            "email": email,
-            "password": generate_password_hash(
-                "google_oauth_pwd_" + str(random.randint(100000, 999999))
-            ),
-            "username": fallback_username,
-        }
-        users_collection.insert_one(new_user)
-        existing_user = new_user
+        return jsonify(
+            {
+                "error": "No account found with this email. Please sign up for an account first."
+            }
+        ), 404
 
     username = existing_user.get("username", f"user_{random.randint(1000, 9999)}")
     token = generate_jwt_token(email, username)

@@ -100,7 +100,7 @@
 /* Grid Layout */
 .vr-grid {
     display: grid;
-    grid-template-columns: 1fr 1.2fr 1fr;
+    grid-template-columns: 1fr 1.2fr;
     gap: 1.5rem;
 }
 
@@ -519,131 +519,13 @@
     background: var(--vr-bg);
     padding: 1rem;
     border-radius: var(--vr-radius-md);
-    margin-bottom: 1.5rem;
+    margin-bottom: 0;
     overflow-y: auto;
-    min-height: 120px;
+    min-height: 180px;
 }
 
-.vr-star-ratings {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.5rem;
-}
 
-.vr-rating-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    background: var(--vr-bg);
-    padding: 0.75rem;
-    border-radius: var(--vr-radius-md);
-    flex: 1;
-}
 
-.vr-rating-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 0.5rem;
-}
-
-.vr-rating-info span {
-    font-size: 0.75rem;
-    display: block;
-    margin-bottom: 0.25rem;
-}
-
-.vr-stars {
-    font-size: 0.75rem;
-}
-
-.vr-card-suggestion h4, .vr-card-actions h4 {
-    font-size: 0.9rem;
-    color: var(--vr-text-main);
-    margin-bottom: 1rem;
-}
-
-.vr-sugg-link {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: var(--vr-green-light);
-    padding: 1rem;
-    border-radius: var(--vr-radius-md);
-    text-decoration: none;
-    color: inherit;
-    border: 1px solid #dcfce7;
-    transition: transform 0.2s;
-}
-.vr-sugg-link:hover {
-    transform: translateY(-2px);
-}
-
-.vr-sugg-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-}
-
-.vr-sugg-text strong {
-    display: block;
-    font-size: 0.9rem;
-}
-.vr-sugg-text span {
-    font-size: 0.75rem;
-    color: var(--vr-text-muted);
-}
-
-.vr-action-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.vr-action-btn {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: var(--vr-card-bg);
-    border: 1px solid var(--vr-border);
-    padding: 0.75rem 1rem;
-    border-radius: var(--vr-radius-md);
-    cursor: pointer;
-    text-align: left;
-    transition: background 0.2s, transform 0.2s;
-}
-
-.vr-action-btn:hover {
-    background: var(--vr-bg);
-    transform: translateY(-1px);
-}
-
-.vr-act-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.vr-act-text strong {
-    display: block;
-    font-size: 0.85rem;
-    color: var(--vr-text-main);
-}
-.vr-act-text span {
-    font-size: 0.7rem;
-    color: var(--vr-text-muted);
-}
 
 .vr-footer {
     display: flex;

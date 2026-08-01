@@ -27,6 +27,21 @@ def save_voice_reflection():
             400,
         )
 
+    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    from database import journals_collection
+    if journals_collection.find_one({"email": email, "date": today_str}):
+        return (
+            jsonify({"error": "You have already completed your daily check-in today using Journal Writing! Only one check-in method per day is allowed."}),
+            400,
+        )
+
+    if voice_collection.find_one({"email": email, "date": today_str}):
+        return (
+            jsonify({"error": "You have already completed your daily voice reflection for today!"}),
+            400,
+        )
+
     # Pass the audio file directly to your PyTorch model script
     try:
         from utils.predictor import evaluate_journal_stress

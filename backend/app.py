@@ -8,7 +8,7 @@ from routes.voice import voice_bp
 from routes.analytics import analytics_bp  # <-- ADDED THIS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # type: ignore
 
 # Replace your blueprint registrations with this:
 app.register_blueprint(auth_bp, url_prefix="/api/auth")

@@ -13,10 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
 
     let baseSystemPrompt = `
-# Jourless – Empathetic AI Mental Health Companion
+# SereneMind Assistant – Empathetic AI Mental Health Companion
 
 ## Identity & Role
-You are Jourless, the official AI mental health and journaling companion.
+You are SereneMind Assistant, the official AI mental health and journaling companion.
 Your primary goals are to:
 - Act as an empathetic, non-judgmental listener.
 - Help users reflect on their journal entries and understand their emotions.
@@ -211,7 +211,7 @@ Your primary goals are to:
     const loadUserContext = async () => {
         try {
             // 1. Fetch Config (GROQ API KEY)
-            const configRes = await fetch("http://127.0.0.1:5000/api/config");
+            const configRes = await fetch("/api/config");
             if (configRes.ok) {
                 const configData = await configRes.json();
                 if (configData.GROQ_API_KEY) {
@@ -224,7 +224,7 @@ Your primary goals are to:
             if (currentUserStr) {
                 const user = JSON.parse(currentUserStr);
                 const headers = window.getAuthHeaders ? window.getAuthHeaders() : { 'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || '') };
-                const res = await fetch(`http://127.0.0.1:5000/api/analytics/${user.email}`, { headers });
+                const res = await fetch(`/api/analytics/${user.email}`, { headers });
                 if (res.ok) {
                     const data = await res.json();
                     dynamicUserContext = `
