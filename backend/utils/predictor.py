@@ -105,7 +105,7 @@ def _encode_text_as_feature_vector(text, batch_size=16, max_length=128):
     chunk_weights = []
 
     for i in range(0, len(chunks), batch_size):
-        batch_chunks = chunks[i : i + batch_size]
+        batch_chunks = chunks[i:i + batch_size]
 
         encoded = tokenizer(
             batch_chunks,

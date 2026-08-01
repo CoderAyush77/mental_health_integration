@@ -16,6 +16,7 @@ STRESS_LABELS = ["Low", "Moderate", "High"]
 POSITIVITY_LABELS = ["Negative", "Neutral", "Positive"]
 POSITIVITY_SCORE = {"Negative": 0.0, "Neutral": 50.0, "Positive": 100.0}
 
+
 class StressClassifier(nn.Module):
     def __init__(self):
         super().__init__()
@@ -30,6 +31,7 @@ class StressClassifier(nn.Module):
         hidden_states = self.wav2vec2(input_values).last_hidden_state
         pooled = hidden_states.mean(dim=1)  # average over time
         return self.stress_head(pooled), self.positivity_head(pooled)
+
 
 # Initialize model and feature extractor once at startup
 feature_extractor = Wav2Vec2FeatureExtractor.from_pretrained(MODEL_NAME)
@@ -51,7 +53,7 @@ def evaluate_voice_audio(audio_file):
     """
     temp_dir = tempfile.gettempdir()
     temp_path = os.path.join(temp_dir, "temp_recording.wav")
-    
+
     # If audio_file is a string path (for local script testing)
     if isinstance(audio_file, str):
         target_path = audio_file
@@ -71,7 +73,7 @@ def evaluate_voice_audio(audio_file):
 
         stress_idx = int(stress_probs.argmax())
         positivity_score = float(sum(p * POSITIVITY_SCORE[l] for p, l in zip(pos_probs, POSITIVITY_LABELS)))
-        
+
         confidence = round(float(stress_probs[stress_idx]) * 100, 2)
         stress_level = STRESS_LABELS[stress_idx]
         positivity = round(positivity_score, 2)
@@ -82,9 +84,9 @@ def evaluate_voice_audio(audio_file):
             "confidence": confidence,
             "stress_level": stress_percentage,
             "positivity": positivity,
-            "stress_label": stress_level 
+            "stress_label": stress_level
         }
-        
+
         overall_emotion = stress_level
         if stress_idx == 0:
             overall_emotion = "Calm" if positivity > 50 else "Neutral"

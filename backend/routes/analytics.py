@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from datetime import datetime, timedelta, timezone
 from bson.objectid import ObjectId
 from database import journals_collection, voice_collection
+from utils.auth_middleware import token_required
 
 analytics_bp = Blueprint("analytics", __name__)
 
@@ -45,7 +46,7 @@ def format_date(date_str):
     try:
         dt = datetime.strptime(date_str, "%Y-%m-%d")
         return dt.strftime("%b %d, %Y")
-    except:
+    except Exception:
         return date_str
 
 
@@ -55,25 +56,32 @@ def get_voice_recommendation(stress_level):
         return {
             "text": "Keep up your positive routine.",
             "link": "../journal/journal.html",
-            "linkText": "Continue Journaling"
+            "linkText": "Continue Journaling",
         }
     elif stress == "Moderate" or stress == "Medium":
         return {
-            "text": "Take a short break and practice relaxation exercises.",
-            "link": "../chatbot/chatbot.html",
-            "linkText": "Relaxation Exercises"
+            "text": "Take a short break and practice breathing exercises.",
+            "link": "../breathing/breathing.html",
+            "linkText": "Breathing Exercises",
         }
-    elif stress == "High" or stress == "Extreme":
+    elif stress == "High":
+        return {
+            "text": "Practice guided meditation and take time for relaxation.",
+            "link": "../meditation/meditation.html",
+            "linkText": "Guided Meditation",
+        }
+    elif stress == "Extreme":
         return {
             "text": "Consider mindfulness exercises and professional support if stress continues.",
             "link": "../help/help.html",
-            "linkText": "Professional Support"
+            "linkText": "Professional Support",
         }
     return {
         "text": "Keep up your positive routine.",
         "link": "../journal/journal.html",
-        "linkText": "Continue Journaling"
+        "linkText": "Continue Journaling",
     }
+
 
 def get_text_recommendation(stress_level):
     stress = str(stress_level).capitalize()
@@ -81,25 +89,25 @@ def get_text_recommendation(stress_level):
         return {
             "text": "Keep maintaining your healthy routine and continue journaling regularly.",
             "link": "../journal/journal.html",
-            "linkText": "Go to Journal"
+            "linkText": "Go to Journal",
         }
     elif stress == "Medium" or stress == "Moderate":
         return {
             "text": "Try a 5-minute breathing exercise and take regular breaks during work or study.",
-            "link": "../chatbot/chatbot.html",
-            "linkText": "Try Breathing Exercise"
+            "link": "../breathing/breathing.html",
+            "linkText": "Try Breathing Exercise",
         }
     elif stress == "High":
         return {
             "text": "Practice guided meditation, reduce workload if possible, and consider talking to a trusted friend or family member.",
-            "link": "../chatbot/chatbot.html",
-            "linkText": "Guided Meditation"
+            "link": "../meditation/meditation.html",
+            "linkText": "Guided Meditation",
         }
     elif stress == "Extreme":
         return {
             "text": "Your responses indicate persistent high stress. Please consider contacting a mental health professional or counselor if these feelings continue.",
             "link": "../help/help.html",
-            "linkText": "Get Professional Help"
+            "linkText": "Get Professional Help",
         }
     return None
 
@@ -108,7 +116,11 @@ def get_text_recommendation(stress_level):
 # API 1: Load Analytics Dashboard
 # ==========================================
 @analytics_bp.route("/<email>", methods=["GET"])
+@token_required
 def get_dashboard(email):
+    if getattr(request, "current_user_email", "").lower() != email.lower():
+        return jsonify({"error": "Forbidden. You can only access your own analytics data."}), 403
+
     text_entries = list(
         journals_collection.find({"email": email}).sort("_id", -1)
     )
@@ -136,7 +148,7 @@ def get_dashboard(email):
         if val > 0:
             try:
                 dt = datetime.strptime(date_str, "%Y-%m-%d")
-            except:
+            except Exception:
                 dt = datetime.min
             if val > highest_stress_val or (
                 val == highest_stress_val and dt > highest_dt
@@ -165,7 +177,7 @@ def get_dashboard(email):
         if val > 0:
             try:
                 dt = datetime.strptime(date_str, "%Y-%m-%d")
-            except:
+            except Exception:
                 dt = datetime.min
             if val > highest_stress_val or (
                 val == highest_stress_val and dt > highest_dt
@@ -219,7 +231,10 @@ def get_dashboard(email):
 # API 2: Load Analysis of Selected Entry
 # ==========================================
 @analytics_bp.route("/<email>/analysis", methods=["GET"])
+@token_required
 def get_analysis(email):
+    if getattr(request, "current_user_email", "").lower() != email.lower():
+        return jsonify({"error": "Forbidden. You can only access your own analysis data."}), 403
     doc_type = request.args.get("type")
     doc_id = request.args.get("id")
 
@@ -228,7 +243,7 @@ def get_analysis(email):
 
     try:
         obj_id = ObjectId(doc_id)
-    except:
+    except Exception:
         return jsonify({"error": "Invalid ID format"}), 400
 
     if doc_type == "text":

@@ -48,6 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Helper to get auth headers dynamically
+    const getHeaders = () => window.getAuthHeaders ? window.getAuthHeaders() : { 'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || '') };
+
     // 1. Fetch and Display User Streak
     const fetchUserStreak = async () => {
         const currentUserStr = localStorage.getItem('currentUser');
@@ -55,7 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = JSON.parse(currentUserStr).email;
 
         try {
-            const response = await fetch(`http://localhost:5000/api/dashboard/streak/${encodeURIComponent(email)}`);
+            const response = await fetch(`http://localhost:5000/api/dashboard/streak/${encodeURIComponent(email)}`, {
+                headers: getHeaders()
+            });
             const data = await response.json();
             
             if (response.ok) {
@@ -91,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 const response = await fetch(`http://localhost:5000/api/journal/${encodeURIComponent(email)}`, {
+                    headers: getHeaders(),
                     cache: 'no-store'
                 });
                 const data = await response.json();
@@ -151,7 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (confirm("Are you sure you want to delete this journal entry?")) {
                                 try {
                                     const res = await fetch(`http://localhost:5000/api/journal/${journalId}`, {
-                                        method: "DELETE"
+                                        method: "DELETE",
+                                        headers: getHeaders()
                                     });
                                     if (res.ok) {
                                         alert("Journal entry deleted successfully.");
@@ -186,7 +193,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = JSON.parse(currentUserStr).email;
 
             try {
-                const response = await fetch(`http://localhost:5000/api/analytics/${encodeURIComponent(email)}`);
+                const response = await fetch(`http://localhost:5000/api/analytics/${encodeURIComponent(email)}`, {
+                    headers: getHeaders()
+                });
                 const data = await response.json();
                 
                 if (response.ok && data.stress_trend) {

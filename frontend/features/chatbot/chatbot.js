@@ -223,7 +223,8 @@ Your primary goals are to:
             const currentUserStr = localStorage.getItem('currentUser');
             if (currentUserStr) {
                 const user = JSON.parse(currentUserStr);
-                const res = await fetch(`http://127.0.0.1:5000/api/analytics/${user.email}`);
+                const headers = window.getAuthHeaders ? window.getAuthHeaders() : { 'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || '') };
+                const res = await fetch(`http://127.0.0.1:5000/api/analytics/${user.email}`, { headers });
                 if (res.ok) {
                     const data = await res.json();
                     dynamicUserContext = `

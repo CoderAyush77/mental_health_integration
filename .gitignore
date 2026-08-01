@@ -9,3 +9,6 @@ backend/uploads/
 *.crdownload
 env/
 __pycache__/
+.vscode/
+*.txt
+

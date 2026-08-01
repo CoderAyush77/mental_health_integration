@@ -13,13 +13,13 @@ start "Backend API (Flask)" cmd /k "cd backend && .\venv\Scripts\python.exe app.
 :: Open the browser automatically after a short delay
 start "" cmd /c "timeout /t 5 >nul & start http://localhost:8000"
 
-:: Try to start the server using Python first (fastest)
-python -m http.server 8000 --directory frontend
+:: Try to start the secure server using Python first (fastest)
+python frontend/serve.py 8000
 
 :: If Python isn't installed, it will try Node.js (npx)
 if %errorlevel% neq 0 (
     echo Python not found, trying Node.js...
-    npx http-server frontend -p 8000
+    npx http-server frontend -p 8000 -d false
 )
 
 pause

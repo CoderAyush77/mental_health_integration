@@ -2,13 +2,13 @@ import os
 import torch
 import joblib
 import numpy as np
-import pandas as pd
-from datasets import load_dataset
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-from scipy.special import softmax
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, accuracy_score
+from datasets import load_dataset  # type: ignore
+from transformers import AutoTokenizer, AutoModelForSequenceClassification  # type: ignore
+from scipy.special import softmax  # type: ignore
+from sklearn.preprocessing import StandardScaler  # type: ignore
+from sklearn.linear_model import LogisticRegression  # type: ignore
+from sklearn.metrics import classification_report, accuracy_score  # type: ignore
+from typing import Any
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -22,7 +22,7 @@ model_dir = os.path.join(base_dir, "ml_model")
 
 print(f"Using device: {DEVICE}")
 print("Loading tokenizer and BERT model...")
-tokenizer = AutoTokenizer.from_pretrained(BERT_MODEL_NAME)
+tokenizer: Any = AutoTokenizer.from_pretrained(BERT_MODEL_NAME)
 bert_model = AutoModelForSequenceClassification.from_pretrained(BERT_MODEL_NAME)
 bert_model.to(DEVICE)
 bert_model.eval()
@@ -34,40 +34,43 @@ dataset = load_dataset('andreagasparini/dreaddit')
 train_data = dataset['train']
 test_data = dataset['test']
 
+
 def mean_pool(last_hidden_state, attention_mask):
     input_mask_expanded = attention_mask.unsqueeze(-1).expand(last_hidden_state.size()).float()
     return torch.sum(last_hidden_state * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
 
+
 def extract_features(texts):
     features = []
-    
+
     # Process in batches for speed
     batch_size = 32
     for i in range(0, len(texts), batch_size):
-        batch_texts = texts[i:i+batch_size]
-        
-        inputs = tokenizer(batch_texts, return_tensors="pt", padding=True, truncation=True, max_length=512)
+        batch_texts = texts[i:i + batch_size]
+
+        inputs = tokenizer(batch_texts, return_tensors="pt", padding=True, truncation=True, max_length=512)  # type: ignore
         inputs = {k: v.to(DEVICE) for k, v in inputs.items()}
-        
+
         with torch.no_grad():
             outputs = bert_model(**inputs, output_hidden_states=True)
-            
+
             # Emotions (7 features)
             logits = outputs.logits.cpu().numpy()
             emotions = softmax(logits, axis=1)
-            
+
             # Embeddings (768 features)
             last_hidden_state = outputs.hidden_states[-1]
             pooled = mean_pool(last_hidden_state, inputs['attention_mask']).cpu().numpy()
-            
+
             # Combine (768 + 7 = 775 features)
             combined = np.concatenate([pooled, emotions], axis=1)
             features.extend(combined)
-            
+
         if (i + batch_size) % 320 == 0:
             print(f"Processed {i + batch_size} / {len(texts)} samples...")
-            
+
     return np.array(features)
+
 
 def map_labels(labels, confidences):
     y = []
@@ -83,6 +86,7 @@ def map_labels(labels, confidences):
             else:
                 y.append('low')
     return np.array(y)
+
 
 # 3. PREPARE TRAINING DATA
 print(f"Processing training data ({len(train_data)} samples)...")

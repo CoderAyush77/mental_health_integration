@@ -30,13 +30,13 @@ def save_voice_reflection():
     # Pass the audio file directly to your PyTorch model script
     try:
         from utils.predictor import evaluate_journal_stress
-        
+
         # 1. Voice-based metrics
         tone_metrics, voice_emotion = evaluate_voice_audio(audio_file)
-        
+
         # 2. Text-based metrics (Highly accurate pre-trained model)
         text_stress, _ = evaluate_journal_stress(content)
-        
+
         # Blend them: if voice model is untrained, it defaults to Neutral/Calm.
         # Use text model as a strong signal override to ensure accurate results.
         overall_emotion = voice_emotion
@@ -51,7 +51,6 @@ def save_voice_reflection():
             overall_emotion = "Calm"
             tone_metrics["positivity"] = max(tone_metrics.get("positivity", 0), 80)
             tone_metrics["stress_level"] = min(tone_metrics.get("stress_level", 100), 20)
-            
 
     except Exception as e:
         import traceback
@@ -126,6 +125,8 @@ def get_voice_history(email):
     return jsonify({"voice_reflections": entries}), 200
 
 # 3. DELETE ROUTE
+
+
 @voice_bp.route('/<entry_id>', methods=['DELETE'])
 def delete_voice_reflection(entry_id):
     try:

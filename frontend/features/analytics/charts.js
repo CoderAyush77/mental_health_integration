@@ -101,7 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadTextAnalysis(id) {
         if (!id) return;
         try {
-            const response = await fetch(`${API_BASE}/${email}/analysis?type=text&id=${id}`);
+            const headers = window.getAuthHeaders ? window.getAuthHeaders() : { 'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || '') };
+            const response = await fetch(`${API_BASE}/${email}/analysis?type=text&id=${id}`, { headers });
             const data = await response.json();
 
             // Stress Level
@@ -149,7 +150,8 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadVoiceAnalysis(id) {
         if (!id) return;
         try {
-            const response = await fetch(`${API_BASE}/${email}/analysis?type=voice&id=${id}`);
+            const headers = window.getAuthHeaders ? window.getAuthHeaders() : { 'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || '') };
+            const response = await fetch(`${API_BASE}/${email}/analysis?type=voice&id=${id}`, { headers });
             const data = await response.json();
 
             // Stress Level
@@ -298,7 +300,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================================
     const loadDashboardData = async () => {
         try {
-            const response = await fetch(`${API_BASE}/${email}`, { cache: 'no-store' });
+            const headers = window.getAuthHeaders ? window.getAuthHeaders() : { 'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || '') };
+            const response = await fetch(`${API_BASE}/${email}`, { headers, cache: 'no-store' });
             dashboardData = await response.json();
 
             // 1. Update Summary Cards

@@ -1,4 +1,17 @@
-// Existing Password Toggle Logic
+// Prevent pre-filled browser autofill values on page load
+        function clearLoginForm() {
+            const loginForm = document.querySelector('#loginForm');
+            if (loginForm) loginForm.reset();
+            const email = document.querySelector('#email');
+            const password = document.querySelector('#password');
+            if (email) email.value = '';
+            if (password) password.value = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', clearLoginForm);
+        window.addEventListener('pageshow', clearLoginForm);
+
+        // Existing Password Toggle Logic
         const togglePassword = document.querySelector('#togglePassword');
         const password = document.querySelector('#password');
         togglePassword.addEventListener('click', function () {
@@ -23,6 +36,9 @@
 
                 const data = await response.json();
                 if (response.ok) {
+                    if (data.token) {
+                        localStorage.setItem('authToken', data.token);
+                    }
                     alert('Login successful!');
                     localStorage.setItem('currentUser', JSON.stringify({
                         name: data.user?.name || 'User',
@@ -31,7 +47,7 @@
                     }));
                     window.location.href = '../../index.html';
                 } else {
-                    alert('Login failed: ' + (data.message || 'Invalid credentials'));
+                    alert('Login failed: ' + (data.error || data.message || 'Invalid credentials'));
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -48,6 +64,7 @@
         // Open Modal
         triggerGoogleModalBtn.addEventListener('click', () => {
             googleDemoModal.classList.add('active');
+            demoEmailInput.value = '';
             // Auto-focus input for convenience
             setTimeout(() => demoEmailInput.focus(), 100);
         });
@@ -77,6 +94,9 @@
 
                 const data = await response.json();
                 if (response.ok) {
+                    if (data.token) {
+                        localStorage.setItem('authToken', data.token);
+                    }
                     alert(`Login successful! Welcome ${data.user?.name || 'Google User'}`);
                     localStorage.setItem('currentUser', JSON.stringify({
                         name: data.user?.name || 'Google User',
@@ -87,7 +107,7 @@
                     googleDemoModal.classList.remove('active');
                     window.location.href = '../../index.html';
                 } else {
-                    alert('Google Login failed: ' + (data.message || 'Unknown error'));
+                    alert('Google Login failed: ' + (data.error || data.message || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Error:', error);

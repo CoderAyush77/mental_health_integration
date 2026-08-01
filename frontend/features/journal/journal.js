@@ -16,9 +16,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Match the backend's "YYYY-MM-DD" UTC date format
     const formattedDate = today.toISOString().split('T')[0];
 
+    const getHeaders = (extra = {}) => window.getAuthHeaders ? window.getAuthHeaders(extra) : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || ''), ...extra };
+
     let hasWrittenToday = false;
     try {
         const response = await fetch(`http://localhost:5000/api/journal/${encodeURIComponent(email)}`, {
+            headers: getHeaders(),
             cache: 'no-store'
         });
         if (response.ok) {
@@ -74,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 try {
                     const response = await fetch('http://localhost:5000/api/journal/create', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: getHeaders({ 'Content-Type': 'application/json' }),
                         body: JSON.stringify({ email, title: titleVal, content: contentVal })
                     });
 

@@ -13,9 +13,19 @@
         if (localStorage.getItem('darkMode') === 'enabled') {
             document.documentElement.classList.add('dark-mode');
         }
+        (function() {
+            var u = localStorage.getItem('currentUser');
+            var t = localStorage.getItem('authToken');
+            if (!u || !t || u === 'null' || t === 'null' || u === 'undefined' || t === 'undefined' || u === '{}') {
+                window.location.href = (window.location.protocol === 'file:') ? '../auth/login.html' : '/features/auth/login.html';
+            }
+        })();
     </script>
 
         <link rel="stylesheet" href="../settings/settings.css">
+
+    <!-- Centralized Auth Guard -->
+    <script src="../../assets/auth-guard.js"></script>
 
     <!-- Custom Global Toast -->
     <link rel="stylesheet" href="/toast.css">
