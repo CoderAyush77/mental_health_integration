@@ -211,7 +211,7 @@ Your primary goals are to:
     const loadUserContext = async () => {
         try {
             // 1. Fetch Config (GROQ API KEY)
-            const configRes = await fetch("/api/config");
+            const configRes = await fetch(apiUrl("/api/config"));
             if (configRes.ok) {
                 const configData = await configRes.json();
                 if (configData.GROQ_API_KEY) {
@@ -224,7 +224,7 @@ Your primary goals are to:
             if (currentUserStr) {
                 const user = JSON.parse(currentUserStr);
                 const headers = window.getAuthHeaders ? window.getAuthHeaders() : { 'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || '') };
-                const res = await fetch(`/api/analytics/${user.email}`, { headers });
+                const res = await fetch(apiUrl(`/api/analytics/${user.email}`), { headers });
                 if (res.ok) {
                     const data = await res.json();
                     dynamicUserContext = `

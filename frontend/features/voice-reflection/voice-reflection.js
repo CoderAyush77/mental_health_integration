@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const getHeaders = (extra = {}) => window.getAuthHeaders ? window.getAuthHeaders(extra) : { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || ''), ...extra };
 
         try {
-            const res = await fetch(`/api/dashboard/daily_checkin_status/${encodeURIComponent(email)}`, {
+            const res = await fetch(apiUrl(`/api/dashboard/daily_checkin_status/${encodeURIComponent(email)}`), {
                 headers: getHeaders(),
                 cache: 'no-store'
             });
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('email', userEmail);
         
         try {
-            const response = await fetch('/api/voice/create', {
+            const response = await fetch(apiUrl('/api/voice/create'), {
                 method: 'POST',
                 body: formData
             });
@@ -445,7 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         try {
-            const response = await fetch(`/api/voice/${currentRecordId}`, {
+            const response = await fetch(apiUrl(`/api/voice/${currentRecordId}`), {
                 method: 'DELETE'
             });
             
@@ -809,7 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             formData.append('email', userEmail);
             
-            const response = await fetch('/api/voice/create', {
+            const response = await fetch(apiUrl('/api/voice/create'), {
                 method: 'POST',
                 body: formData
             });

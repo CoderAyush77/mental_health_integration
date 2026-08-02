@@ -22,4 +22,12 @@
     }
 
     window.API_BASE_URL = apiBase;
+
+    /** Resolve an /api/... path to the backend base URL (port 5000 in local dev). */
+    window.apiUrl = function (path) {
+        const base = window.API_BASE_URL || '/api';
+        if (path.startsWith('/api/')) return base + path.slice(4);
+        if (path.startsWith('/api')) return base;
+        return base + (path.startsWith('/') ? path : '/' + path);
+    };
 })();

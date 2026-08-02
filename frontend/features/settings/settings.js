@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 1. Fetch settings on load
     try {
-        const response = await fetch(`/api/settings/${encodeURIComponent(email)}`);
+        const response = await fetch(apiUrl(`/api/settings/${encodeURIComponent(email)}`));
         if (response.ok) {
             const data = await response.json();
             if (data.ProfileInformation) {
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             try {
                 // 1. Update Profile & Preferences
-                const updateRes = await fetch('/api/settings/update', {
+                const updateRes = await fetch(apiUrl('/api/settings/update'), {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     } else if (!currentPwd || !newPwd) {
                         alert("Please fill in both current and new password fields.");
                     } else {
-                        const pwdRes = await fetch('/api/settings/change-password', {
+                        const pwdRes = await fetch(apiUrl('/api/settings/change-password'), {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (confirm("Are you absolutely sure you want to delete your account? This action cannot be undone.")) {
                 try {
-                    const response = await fetch('/api/settings/delete', {
+                    const response = await fetch(apiUrl('/api/settings/delete'), {
                         method: 'DELETE',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email: email, password: pwd })

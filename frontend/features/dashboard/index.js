@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = JSON.parse(currentUserStr).email;
 
         try {
-            const response = await fetch(`/api/dashboard/streak/${encodeURIComponent(email)}`, {
+            const response = await fetch(apiUrl(`/api/dashboard/streak/${encodeURIComponent(email)}`), {
                 headers: getHeaders()
             });
             const data = await response.json();
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = JSON.parse(currentUserStr).email;
 
             try {
-                const response = await fetch(`/api/journal/${encodeURIComponent(email)}`, {
+                const response = await fetch(apiUrl(`/api/journal/${encodeURIComponent(email)}`), {
                     headers: getHeaders(),
                     cache: 'no-store'
                 });
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const journalId = btn.getAttribute('data-id');
                             if (confirm("Are you sure you want to delete this journal entry?")) {
                                 try {
-                                    const res = await fetch(`/api/journal/${journalId}`, {
+                                    const res = await fetch(apiUrl(`/api/journal/${journalId}`), {
                                         method: "DELETE",
                                         headers: getHeaders()
                                     });
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = JSON.parse(currentUserStr).email;
 
             try {
-                const response = await fetch(`/api/analytics/${encodeURIComponent(email)}`, {
+                const response = await fetch(apiUrl(`/api/analytics/${encodeURIComponent(email)}`), {
                     headers: getHeaders()
                 });
                 const data = await response.json();

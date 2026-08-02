@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let hasWrittenJournalToday = false;
     let hasWrittenVoiceToday = false;
     try {
-        const response = await fetch(`/api/dashboard/daily_checkin_status/${encodeURIComponent(email)}`, {
+        const response = await fetch(apiUrl(`/api/dashboard/daily_checkin_status/${encodeURIComponent(email)}`), {
             headers: getHeaders(),
             cache: 'no-store'
         });
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 try {
-                    const response = await fetch('/api/journal/create', {
+                    const response = await fetch(apiUrl('/api/journal/create'), {
                         method: 'POST',
                         headers: getHeaders({ 'Content-Type': 'application/json' }),
                         body: JSON.stringify({ email, title: titleVal, content: contentVal })
